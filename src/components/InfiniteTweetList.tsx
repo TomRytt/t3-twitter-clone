@@ -1,4 +1,7 @@
 import InfiniteScroll from "react-infinite-scroll-component";
+import { ProfileImage } from "./ProfileImage";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 type Tweet = {
   id: string;
@@ -16,6 +19,10 @@ type InfiniteTweetListProps = {
   fetchNewTweets: () => Promise<unknown>;
   tweets: Tweet[];
 };
+
+const dateTimeformatter = Intl.DateTimeFormat(undefined, {
+  dateStyle: "short",
+});
 
 export function InfiniteTweetList({
   tweets,
@@ -41,9 +48,49 @@ export function InfiniteTweetList({
         loader={"Loading..."}
       >
         {tweets.map((tweet) => {
-          return <div key={tweet.id}>{tweet.content}</div>;
+          return <TweetCard key={tweet.id} {...tweet} />;
         })}
       </InfiniteScroll>
     </ul>
   );
+}
+
+function TweetCard({
+  id,
+  user,
+  content,
+  createdAt,
+  likeCount,
+  likedByMe,
+}: Tweet) {
+  return (
+    <li className="flex gap-4 border-b px-4 py-4">
+      <Link href={`/profiles/${user.id}`}>
+        <ProfileImage src={user.image} />
+      </Link>
+      <div className="flex flex-grow flex-col">
+        <div className="flex gap-1">
+          <Link
+            href={`/profiles/${user.id}`}
+            className="focus:visible:underline font-bold outline-none hover:underline "
+          >
+            {user.name}
+          </Link>
+          <span className="text-gray-500">-</span>
+          <span className="text-gray-500">
+            {dateTimeformatter.format(createdAt)}
+          </span>
+          <p className="whitespace-pre-wrap">{content}</p>
+          <HeartButton />
+        </div>
+      </div>
+    </li>
+  );
+}
+
+function HeartButton() {
+  // TODO: Continue from here
+  const session = useSession();
+
+  return <h5>Heart</h5>;
 }
