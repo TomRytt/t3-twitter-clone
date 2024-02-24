@@ -34,7 +34,7 @@ export function InfiniteTweetList({
   isError,
   isLoading,
   fetchNewTweets,
-  hasMore,
+  hasMore = false,
 }: InfiniteTweetListProps) {
   if (isLoading) return <h1>Loading</h1>;
   if (isError) return <h1>Error</h1>;
@@ -150,7 +150,6 @@ function HeartButton({
   isLoading,
   onClick,
 }: HeartButtonPropsType) {
-  // TODO: Continue from here
   const session = useSession();
   const HeartIcon = likedByMe ? VscHeartFilled : VscHeart;
   if (session.status !== "authenticated") {
