@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { VscHeartFilled, VscHeart } from "react-icons/vsc";
 import { IconHoverEffect } from "./IconHoverEffect";
 import { api } from "~/utils/api";
+import { tweetRouter } from "~/server/api/routers/tweet";
 
 type Tweet = {
   id: string;
@@ -67,7 +68,40 @@ function TweetCard({
   likeCount,
   likedByMe,
 }: Tweet) {
-  const toggleLike = api.tweet.toggleLike.useMutation();
+  const trpcUtils = api.useUtils();
+  const toggleLike = api.tweet.toggleLike.useMutation({
+    onSuccess: ({ addedLike }) => {
+      const updateData: Parameters<
+        typeof trpcUtils.tweet.infiniteFeed.setInfiniteData
+      >[1] = (oldData) => {
+        if (oldData == null) return;
+
+        const countModifier = addedLike ? 1 : -1;
+
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) => {
+            return {
+              ...page,
+              tweets: page.tweets.map((tweet) => {
+                if (tweet.id === id) {
+                  return {
+                    ...tweet,
+                    likeCount: likeCount + countModifier,
+                    likedByMe: addedLike,
+                  };
+                }
+
+                return tweet;
+              }),
+            };
+          }),
+        };
+      };
+
+      trpcUtils.tweet.infiniteFeed.setInfiniteData({}, updateData);
+    },
+  });
 
   function handleToggleLike() {
     toggleLike.mutate({ id });
