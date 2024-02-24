@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 
 import { VscHeartFilled, VscHeart } from "react-icons/vsc";
 import { IconHoverEffect } from "./IconHoverEffect";
+import { api } from "~/utils/api";
 
 type Tweet = {
   id: string;
@@ -66,6 +67,12 @@ function TweetCard({
   likeCount,
   likedByMe,
 }: Tweet) {
+  const toggleLike = api.tweet.toggleLike.useMutation();
+
+  function handleToggleLike() {
+    toggleLike.mutate({ id });
+  }
+
   return (
     <li className="flex gap-4 border-b px-4 py-4">
       <Link href={`/profiles/${user.id}`}>
@@ -85,7 +92,12 @@ function TweetCard({
           </span>
           <p className="whitespace-pre-wrap">{content}</p>
         </div>
-        <HeartButton likedByMe={likedByMe} likeCount={likeCount} />
+        <HeartButton
+          onClick={handleToggleLike}
+          isLoading={toggleLike.isLoading}
+          likedByMe={likedByMe}
+          likeCount={likeCount}
+        />
       </div>
     </li>
   );
@@ -94,9 +106,16 @@ function TweetCard({
 type HeartButtonPropsType = {
   likedByMe: boolean;
   likeCount: number;
+  isLoading: boolean;
+  onClick: () => void;
 };
 
-function HeartButton({ likedByMe, likeCount }: HeartButtonPropsType) {
+function HeartButton({
+  likedByMe,
+  likeCount,
+  isLoading,
+  onClick,
+}: HeartButtonPropsType) {
   // TODO: Continue from here
   const session = useSession();
   const HeartIcon = likedByMe ? VscHeartFilled : VscHeart;
@@ -110,6 +129,8 @@ function HeartButton({ likedByMe, likeCount }: HeartButtonPropsType) {
   }
   return (
     <button
+      disabled={isLoading}
+      onClick={onClick}
       className={`group flex items-center gap-1 self-start transition-colors duration-200 ${
         likedByMe
           ? "text-red-500"
