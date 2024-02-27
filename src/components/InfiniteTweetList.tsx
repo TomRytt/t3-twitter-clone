@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import { VscHeartFilled, VscHeart } from "react-icons/vsc";
 import { IconHoverEffect } from "./IconHoverEffect";
 import { api } from "~/utils/api";
-import { tweetRouter } from "~/server/api/routers/tweet";
+import { LoadingSpinner } from "./LoadingSpinner";
 
 type Tweet = {
   id: string;
@@ -20,9 +20,9 @@ type Tweet = {
 type InfiniteTweetListProps = {
   isLoading: boolean;
   isError: boolean;
-  hasMore: boolean;
+  hasMore: boolean | undefined;
   fetchNewTweets: () => Promise<unknown>;
-  tweets: Tweet[];
+  tweets?: Tweet[];
 };
 
 const dateTimeformatter = Intl.DateTimeFormat(undefined, {
