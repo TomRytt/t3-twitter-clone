@@ -1,4 +1,4 @@
-import { db } from './../../db';
+import { db } from '../../db';
 import { z } from "zod";
 import {
     createTRPCRouter,
@@ -64,7 +64,8 @@ export const profileRouter = createTRPCRouter({
                 addedFollow = false
             }
 
-            // Revalidation
+            void ctx.revalidateSSG?.(`/profiles/${userId}`)
+            void ctx.revalidateSSG?.(`/profiles/${currentUserId}`)
 
             return { addedFollow }
         })
